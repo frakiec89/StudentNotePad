@@ -3,32 +3,60 @@ using StudentNotePad.Model;
 
 namespace StudentNotePad.Services
 {
-    internal class GroupService
+    public class GroupService : FileService
     {
-        private string _path = "Group.txt";
+        private const string _path = "Group.txt"; // путь к файлу  
         public List<Group> Groups { get; private set; }
-        
-        public GroupService() 
+
+        public GroupService() : base(_path)
         {
-            Groups = GetGroupsForTXT(_path);    
+            Groups = GetGroupsForTXT();    
         }
 
-        private List<Group> GetGroupsForTXT(string path)
+        public void Add(string name)
         {
-            string[] lines = null;
-            
-            try
-            {
-                lines = File.ReadAllLines(path);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Ошибка чтения файла c группами");
-            }
 
+           int  maxId = 0; // поиск  нового ид 
+           foreach (Group group in Groups)
+           {
+                if (group.Id > maxId)
+                    maxId = group.Id;
+
+                if (group.Name == name) // проверка  на  одинаковое  название
+                    throw new Exception("Такая  группа уже есть");
+           }
+
+            Group newGroup = new Group(maxId+1, name);
+            Groups.Add(newGroup);
+            Save(); // перезаписываем  файл 
+
+        }
+
+
+        /// <summary>
+        /// поиск  группы  по  ид
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public Group GetGroup(int  id)
+        {
+            foreach (Group group in Groups)
+            {
+                if (group.Id == id)
+                    return group;
+            }
+            throw new ArgumentException("Группа не найдена");
+        }
+
+        /// <summary>
+        /// парсинг из файла  в формате 1*ис-22-01
+        /// </summary>
+        /// <returns></returns>
+        private List<Group> GetGroupsForTXT()
+        {
             List<Group> values = new List<Group>();
-            
-            foreach (string line in lines)
+            foreach (string line in base.GetLines())
             {
                 string[] propertyGroup = line.Split('*');
                 try
@@ -45,5 +73,18 @@ namespace StudentNotePad.Services
             }
             return values;
         }
+
+        private void Save ()
+         {
+            List<string> strings = new List<string>(); // строки  в  формате  1*ис-23-03
+            
+            foreach (Group group in Groups)
+            {
+                string grString = $"{group.Id}*{group.Name}";
+                strings.Add(grString);
+            }
+            base.Save(strings.ToArray());
+        }
+
     }
 }
