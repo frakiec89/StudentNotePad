@@ -67,6 +67,42 @@ namespace StudentNotePad.Services
             Save(); //  перезаписывает  файл
         }
 
+        public void Delete (int id)
+        {
+            try
+            {
+                Student student = GetStudent(id);
+                Students.Remove(student);
+                Save();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        public Student[] GetStudentGroup (int idGr)
+        {
+            List<Student> students = new List<Student>();
+            foreach (Student st in Students )
+            {
+                if(st.Group.Id == idGr)
+                    students.Add(st);
+            }
+            return students.ToArray();
+        }
+
+
+        public Student GetStudent(int id)
+        {
+            foreach (Student st in Students)
+            {
+                if(st.Id== id)
+                    return st;
+            }
+            throw new Exception("студент не найден");
+        }
+
         private void Save ()
         {
             List<string> studentStrings = new List<string>();

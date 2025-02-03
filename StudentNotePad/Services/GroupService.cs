@@ -12,10 +12,8 @@ namespace StudentNotePad.Services
         {
             Groups = GetGroupsForTXT();    
         }
-
         public void Add(string name)
         {
-
            int  maxId = 0; // поиск  нового ид 
            foreach (Group group in Groups)
            {
@@ -25,13 +23,28 @@ namespace StudentNotePad.Services
                 if (group.Name == name) // проверка  на  одинаковое  название
                     throw new Exception("Такая  группа уже есть");
            }
-
-            Group newGroup = new Group(maxId+1, name);
-            Groups.Add(newGroup);
-            Save(); // перезаписываем  файл 
-
+           Group newGroup = new Group(maxId+1, name);
+           Groups.Add(newGroup);
+           Save(); // перезаписываем  файл 
         }
 
+        public void Delete (StudentService service , int  idGr  )
+        {
+            try
+            {
+                Group gr = GetGroup(idGr);
+
+                if (service.GetStudentGroup(idGr).Length != 0)
+                    throw new Exception("нельзя удалить группу пока в ней  есть хоть один студент");
+                
+                Groups.Remove(gr);
+                Save();
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
 
         /// <summary>
         /// поиск  группы  по  ид
